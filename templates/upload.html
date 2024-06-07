@@ -1,0 +1,171 @@
+<!-- upload.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title >Upload Snake Image</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: black;
+            
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background-image: url("static/pexels-donald-tong-23817.jpg");
+            background-size: cover;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: rgba(0, 0, 0, 0.671);
+            margin-bottom: 20px;
+        }
+        
+
+        #uploadForm {
+            margin: 0 auto;
+            max-width: 400px;
+            background-color: #ffffff21;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.336);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+        .block{
+            position:relative;
+            margin: 10% auto 0;
+            width: 50%;
+            height: 400px;
+            background: linear-gradient(0deg,black,rgba(45, 45, 0, 0.89));
+        }
+        
+
+        #uploadButton {
+            background-color: #af4c7a;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #uploadButton:hover {
+            background-color: #4e45a0;
+        }
+
+        #uploadedImage {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #predictButton {
+           
+            color:white;
+            background-image: linear-gradient(41deg,#d041d0 0%,#c85050 45%,#5053ff 100%);
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #predictButton:hover {
+            background-color: #45a059;
+        }
+
+        #result {
+    margin-top: 20px;
+    color: white;
+    font-size: 18px;
+    
+    background-color: rgba(208, 255, 0, 0.11); /* Yellow background color with transparency */
+    transition: background-color 0.3s ease; /* Transition for background color change */
+    opacity: 1; /* Initial opacity */
+}
+
+.transparent-bg {
+    background-color: rgba(255, 255, 0, 0); /* Transparent yellow background color */
+}
+
+    </style>
+</head>
+<body>
+    <h1>Upload Snake Image</h1>
+
+    <!-- Image upload form -->
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="fileInput" style="cursor: pointer;">
+            <input type="file" id="fileInput" name="file" accept="image/*" onchange="previewImage()" required>
+            <span style="background-color: #4caf6a; color: white; padding: 12px 20px; font-size: 16px; border-radius: 10px;">
+                Choose Image
+            </span>
+        </label>
+        <br><br>
+        <img id="uploadedImage" style="display: none;">
+        <br>
+        <button id="predictButton" type="button" onclick="uploadAndPredict()">Predict</button>
+    </form>
+
+    <!-- Display prediction result -->
+    <div id="result"></div>
+
+    <!-- Include your JavaScript code -->
+    <script>
+        function previewImage() {
+            var fileInput = document.querySelector('input[type="file"]');
+            var uploadedImage = document.getElementById('uploadedImage');
+            uploadedImage.src = URL.createObjectURL(fileInput.files[0]);
+            uploadedImage.style.display = 'block';
+        }
+    
+        function uploadAndPredict() {
+            var fileInput = document.querySelector('input[type="file"]');
+            var file = fileInput.files[0];
+    
+            if (!file) {
+                alert('Please select an image file.');
+                return;
+            }
+    
+            var formData = new FormData();
+            formData.append('file', file);
+    
+            // Use fetch API to send a POST request
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display prediction result
+                var resultDiv = document.getElementById('result');
+                var predictionText = '<div><span style="color:blue;">Prediction: </span>' + data.class_name + '</div><br>';
+            predictionText += '<div>(<span style="color: red;">Country:</span> <span style="color: yellow;">' + data.country + '</span>)</div><br>';
+            predictionText += '<div>(' + (data.venomous ? '<span style="color: red;">Venomous</span>' : '<span style="color: green;">Non-venomous</span>') + ')</div><br>';
+            predictionText += '<div><span style="color:orange;">Habitat:</span>' + data.habitat + '</div>'; 
+                resultDiv.innerHTML =   predictionText ;
+                resultDiv.classList.add('transparent-bg');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    
+</body>
+</html>
